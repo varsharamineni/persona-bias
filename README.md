@@ -1,5 +1,15 @@
 # Bias Runs Deep: Implicit Reasoning Biases in Persona-Assigned LLMs
 
+## Adapted Parts
+
+Adapted to run with hf models and local loaded models
+
+
+
+
+## Original Repo README
+
+
 Code accompanying the paper **_Bias Runs Deep: Implicit Reasoning Biases in Persona-Assigned LLMs_** at [ICLR 2024](https://iclr.cc/Conferences/2024).
 
 [Paper](https://arxiv.org/abs/2311.04892) || [Project website](https://allenai.github.io/persona-bias/) || [Dataset](https://huggingface.co/datasets/allenai/persona-bias)
