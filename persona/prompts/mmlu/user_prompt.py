@@ -1,3 +1,5 @@
-USER_PROMPT_TEMPLATE = """Answer the given multiple choice question and show your work. The answer can only be an option like (A), (B), (C), (D). You need to output the answer in your final sentence like "Therefore, the answer is ...".
+USER_PROMPT_TEMPLATE = """Please reason step by step to solve the following multiple-choice question.
+ The answer can only be an option like (A), (B), (C), (D). 
+ Please put your final answer in the answer field with only the choice letter, e.g., "answer": "C"
 
 Question: {question}"""

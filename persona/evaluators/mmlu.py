@@ -4,23 +4,35 @@ import re
 from persona.evaluators.base import BaseEvaluator
 
 class MMLUEvaluator(BaseEvaluator):
-
-    def _extract_answer(self, prediction:str):
-        if (prediction is None) or (prediction == ''):
+    
+    def _extract_answer(self, prediction: str):
+        if not prediction:
             return None
-        
-        matches = re.findall(r"answer is:?\s*(.*)", prediction, re.IGNORECASE)
-        if matches:
-            prediction = matches[-1].strip().strip(".")
 
-        prediction = prediction.strip('\n').strip().strip(".")
+        # Normalize newlines for consistent regex matching
+        text = prediction.strip()
 
-        match = re.search(r'\(([a-z])\)', prediction, re.IGNORECASE)
+        # Priority 1: Explicit JSON answer format {"answer": "C"}
+        match = re.search(r'"answer"\s*:\s*"([A-Da-d])"', text)
         if match:
-            return match.group(1)
-        else:
-            #If these errors are a lot, add support for extracting the answer using ChatGPT
-            return None
+            return match.group(1).upper()
+
+        # Priority 2: "answer is C" or "answer is: (C)"
+        match = re.search(r'\banswer\s+is\s*:?\s*\(?([A-Da-d])\)?', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+
+        # Priority 3: "answer: C" or "answer: (C)"
+        match = re.search(r'\banswer\s*:?\s*\(?([A-Da-d])\)?', text, re.IGNORECASE)
+        if match:
+            return match.group(1).upper()
+
+        # Priority 4: A single capital letter on its own line
+        match = re.search(r'^\s*([A-Da-d])\s*$', text, re.MULTILINE)
+        if match:
+            return match.group(1).upper()
+
+        return None
 
     def _normalize(self, text):
         return text.replace("(", "").replace(")", "").upper().strip()

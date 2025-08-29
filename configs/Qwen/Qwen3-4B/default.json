@@ -1,4 +1,4 @@
-{ "model_name": "Qwen/Qwen3-4B",
+{ "model_name": "Qwen3-4B",
     "bos_token_id": 151643,
     "do_sample": true,
     "eos_token_id": [
