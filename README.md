@@ -5,6 +5,9 @@
 Adapted to run with hf models and local loaded models
 
 
+```bash
+PYTHONPATH=. python batch_runner_test.py   --datasets mmlu-college_biology   --personas "a human"   --model_name Qwen/Qwen3-4B   --use_vllm   --end_idx 2   --experiment_prefix testrun
+```
 
 
 ## Original Repo README
