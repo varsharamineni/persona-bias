@@ -48,16 +48,16 @@ parser.add_argument("--use_predef_personas", action="store_true", default=False)
 parser.add_argument("--use_predef_datasets", action="store_true", default=False)
 parser.add_argument("--use_predef_max_size", action="store_true", default=False)
 parser.add_argument("--run_no_persona", action="store_true", default=False)
-parser.add_argument("--prompt_type", default='no_persona')
+parser.add_argument("--prompt_type", default='adopt_identity_accordance')
 parser.add_argument("--start_idx", type=int, required=False)
 parser.add_argument("--end_idx", type=int, required=False)
 parser.add_argument("--experiment_prefix", default="")
 parser.add_argument("--out_file_prefix", default='')
 parser.add_argument("--repeat", type=int, default=1)
 parser.add_argument("--model_name", default="gpt-3.5-turbo-0613")
+parser.add_argument("--tensor_parallel_size", type=int, default=2,
+                    help="Tensor parallel size for vLLM models")
 
-# NEW ARG: choose run script
-parser.add_argument("--use_vllm", action="store_true", default=False, help="Use run_vllm.py with --use_local_model flag")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -97,10 +97,10 @@ if __name__ == "__main__":
     for dataset, personas in dataset_persona_map.items():
         print(f"{dataset}: {personas}")
 
-    parallelization_factor = 2
-    sleep_time = 15 * 60
+    parallelization_factor = 1
+    sleep_time = 0.1 * 60
 
-    run_script = "persona/run_vllm.py" if args.use_vllm else "persona/run.py"
+    run_script = "persona/run_vllm_qwen3_batch.py" 
 
     for dataset, personas in dataset_persona_map.items():
         print(f"\n\nLaunching Python scripts for dataset: {dataset}")
@@ -115,6 +115,7 @@ if __name__ == "__main__":
                 "prompt_type": prompt_type,
                 "persona": f"\"{persona}\"",
                 "model_name": args.model_name,
+                "tensor_parallel_size": args.tensor_parallel_size,
             }
             if args.org_id:
                 kwargs['org_id'] = args.org_id
@@ -140,8 +141,6 @@ if __name__ == "__main__":
 
             args_string = " ".join([f"--{k} {v}" for k, v in kwargs.items()])
             args_string += " --eval"
-            if args.use_vllm:
-                args_string += " --use_local_model"
 
             for i in range(args.repeat):
                 out_file = output_file if args.repeat == 1 else output_file.replace(".txt", f"_r{i}.txt")

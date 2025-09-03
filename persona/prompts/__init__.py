@@ -33,8 +33,9 @@ def get_prompt(dataset_name: str, model_name: str, prompt_type: str, persona: st
         else:
             user_prompt = user_prompt_module.USER_PROMPT_TEMPLATE
 
-        # For local models, combine system + user prompts directly
-        if not is_openai or not is_openai_chat_model(model_name):
+        # combine system + user prompts directly if not gpt or qwen chat model
+        is_qwen_chat = "qwen3" in model_name.lower()
+        if not is_openai and not is_openai_chat_model(model_name) and not is_qwen_chat:
             user_prompt = f"{system_prompt}\n\n{user_prompt}"
             system_prompt = ""
 

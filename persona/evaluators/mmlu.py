@@ -1,6 +1,5 @@
 import argparse
 import re
-
 from persona.evaluators.base import BaseEvaluator
 
 class MMLUEvaluator(BaseEvaluator):
@@ -9,43 +8,40 @@ class MMLUEvaluator(BaseEvaluator):
         if not prediction:
             return None
 
-        # Normalize newlines for consistent regex matching
-        text = prediction.strip()
+        # Strip <think> tags if present
+        text = prediction.replace("<think>", "").replace("</think>", "").strip()
 
-        # Priority 1: Explicit JSON answer format {"answer": "C"}
-        match = re.search(r'"answer"\s*:\s*"([A-Da-d])"', text)
-        if match:
-            return match.group(1).upper()
+        # Normalize whitespace
+        text = " ".join(text.split())
 
-        # Priority 2: "answer is C" or "answer is: (C)"
-        match = re.search(r'\banswer\s+is\s*:?\s*\(?([A-Da-d])\)?', text, re.IGNORECASE)
+        # Combined regex for all common answer formats
+        match = re.search(
+            r'"answer"\s*:\s*"([A-Da-d])"'      # JSON format
+            r'|answer\s*(?:is)?\s*:?\s*\(?([A-Da-d])\)?[.,]?',  # answer: C / answer is C
+            text,
+            re.IGNORECASE
+        )
         if match:
-            return match.group(1).upper()
+            return (match.group(1) or match.group(2)).upper()
 
-        # Priority 3: "answer: C" or "answer: (C)"
-        match = re.search(r'\banswer\s*:?\s*\(?([A-Da-d])\)?', text, re.IGNORECASE)
-        if match:
-            return match.group(1).upper()
-
-        # Priority 4: A single capital letter on its own line
-        match = re.search(r'^\s*([A-Da-d])\s*$', text, re.MULTILINE)
-        if match:
-            return match.group(1).upper()
+        # Fallback: Last standalone A-D in text
+        matches = re.findall(r'\b([A-Da-d])\b', text)
+        if matches:
+            return matches[-1].upper()
 
         return None
 
     def _normalize(self, text):
+        if not text:
+            return ""
         return text.replace("(", "").replace(")", "").upper().strip()
 
     def _check_equal(self, instance) -> bool:
         '''Compare prediction against the reference'''
-        gt = self._normalize(instance['answer'])
-        pred = self._normalize(instance['predicted_answer'])
+        gt = self._normalize(instance.get('answer', ''))
+        pred = self._normalize(instance.get('predicted_answer', ''))
 
-        if gt == pred:
-            return True
-        else:
-            return False
+        return gt == pred
 
 
 parser = argparse.ArgumentParser()

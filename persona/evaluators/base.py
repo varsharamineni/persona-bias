@@ -37,7 +37,7 @@ class BaseEvaluator:
             # gt = instance['answer']
             # answer_type = instance['answer_type']
 
-            predictions = instance['predicted_explanations']
+            predictions = [instance['predicted_explanations']]
             if len(predictions) == 0:
                 empty_prediction_count += 1
                 instance['predicted_answer'] = ""
@@ -47,11 +47,13 @@ class BaseEvaluator:
 
             # Caution: Some of the normalized predictions can be None
             predicted_answers = [self._extract_answer(prediction) for prediction in predictions]
+            print(f"Predictions: {predictions} => Extracted answers: {predicted_answers}")
             prediction = predicted_answers[0]
+            print(f"Using the first extracted answer as the final prediction: {prediction}")
 
             if (prediction is None) or (prediction == ''):
                 extraction_failure_count += 1
-                instance['predicted_answer'] = ""
+                instance['predicted_answer'] = "-"
                 instance['is_correct'] = False
                 labeled_instances.append(instance)
                 print(f"Extraction failure: {instance['predicted_explanations']}")
